@@ -1,0 +1,2 @@
+<h1>XBee API Transmit test</h1>
+<p>This "library", that is an arduino PDE in fact, is for transmitting data via the XBee in API mode, later, someday, I will update this "library" and make it a real library with more functions and data validation.</h1>
