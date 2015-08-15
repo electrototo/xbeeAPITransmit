@@ -182,7 +182,7 @@ void loop() {
 
   Serial.println(transmit_status_read());
 
-  delay(4900);
+  delay(299900);
 }
 
 
