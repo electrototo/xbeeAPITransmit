@@ -20,7 +20,7 @@ byte discardByte, msb, lsb, ftype;
 
 int frameID, DStatus;
 
-String payload, answerStatus;
+String payload, incommingData;
 
 void setup() {
   Serial.begin(9600);
@@ -168,25 +168,28 @@ String status_read(){
 
 void loop() {
   //Change format in raspberry's code 
-  payload = "";
+
+  incommingData = status_read();
+
+  if(incommingData == "tfailure"){
+    //insert code to retry for certain time... 
+  }
+  if(incommingData == "transmit"){
+    //insert transmition code here...
+    payload = "";
   
-  temp = tempsensor.readTemperature();
-  humidity = tempsensor.readHumidity();
+    temp = tempsensor.readTemperature();
+    humidity = tempsensor.readHumidity();
 
-  payload.concat(temp);
-  payload.concat(":");
-  payload.concat(humidity);
+    payload.concat(temp);
+    payload.concat(":");
+    payload.concat(humidity);
   
-  transmit(payload);
-
-  delay(100);
-
-  answerStatus = status_read();
-
-  if(answerStatus == "failure"){
+    transmit(payload);
+    
   }
 
-  delay(299900);
+  delay(100);
 }
 
 
