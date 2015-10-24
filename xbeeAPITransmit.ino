@@ -54,9 +54,15 @@ byte p_length(int hsize, String payload){
 }
 
 void write_packet(byte packet[], int p_size){
+  byte actualchks;
+  
   for(int i = 0; i < p_size; i++){
     xbee.write(packet[i]);
   }
+
+  actualchksm = checksum(packet, p_size);
+  
+  xbee.write(actualchks);
 }
 
 void transmit(String payload, byte frame_type=FTYPE){
@@ -101,13 +107,11 @@ void transmit(String payload, byte frame_type=FTYPE){
       }
 
       write_packet(fpacket, sizeof(fpacket));
-    
-      xbee.write(checksum(fpacket, sizeof(fpacket)));
     }
       break;
       
     default:
-      Serial.println("No packte was transmitted");
+      Serial.println("No packet was transmitted");
   }
   
 }
