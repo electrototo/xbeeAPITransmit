@@ -20,6 +20,8 @@ byte discardByte, msb, lsb, ftype;
 
 int frameID, DStatus;
 
+String payload, answerStatus;
+
 void setup() {
   Serial.begin(9600);
   xbee.begin(9600);
@@ -60,7 +62,7 @@ void write_packet(byte packet[], int p_size){
     xbee.write(packet[i]);
   }
 
-  actualchksm = checksum(packet, p_size);
+  actualchks = checksum(packet, p_size);
   
   xbee.write(actualchks);
 }
@@ -116,9 +118,14 @@ void transmit(String payload, byte frame_type=FTYPE){
   
 }
 
-String transmit_status_read(){
+String status_read(){
   // Returns in an array frame ID and delivery status
+  //Gota change string answer with byte answer... To saver computer processing power... 
+  //Gotta map bytes to failures
+  
   String answer;
+  
+  byte checksum;
 
   while(xbee.available()){
     if(xbee.read() == 0x7E){
@@ -126,41 +133,30 @@ String transmit_status_read(){
       
       byte lsb = xbee.read();
       byte ftype = xbee.read();
-      byte checksum;
 
       if(ftype == 0x8B){
-        byte frameID;
-        byte DStatus;
-        
-        for(int i = 0; i < lsb-1; i++){
-          switch(i){
-            case 0:
-              frameID = xbee.read();
-              break;
-            case 4:
-              DStatus = xbee.read();
-              break;
-            default:
-              xbee.read();
-          }
-        }
-        
-        answer = "Frame ID: ";
-        answer.concat(frameID);
-        answer.concat(", Delivery Status: ");
+        byte frameID = xbee.read();
+        byte source16[2];
 
-        switch(DStatus){
-          case 0x00:
-            answer.concat("Success!");
-            break;
-          default:
-            answer.concat("Unknown error (gotta change this later)");
+        for(int i = 0; i < 2; i++){
+          source16[i] = xbee.read();
         }
         
+        byte TRetry = xbee.read();
+        byte DStatus = xbee.read();
+        byte DiStatus = xbee.read();
+
+        if(DStatus != 0x00){
+          answer = "tfailure";
+        } 
+        else {
+          answer = "success";
+        }
       } else {
         for(int i = 0; i < lsb-1; i++){
           Serial.print(xbee.read());
         }
+        
       }
       
       checksum = xbee.read();
@@ -171,21 +167,24 @@ String transmit_status_read(){
 }
 
 void loop() {
-  String payload = "{0:";
+  //Change format in raspberry's code 
+  payload = "";
   
   temp = tempsensor.readTemperature();
   humidity = tempsensor.readHumidity();
 
   payload.concat(temp);
-  payload.concat(", 1:");
+  payload.concat(":");
   payload.concat(humidity);
-  payload.concat("}");
   
   transmit(payload);
 
   delay(100);
 
-  Serial.println(transmit_status_read());
+  answerStatus = status_read();
+
+  if(answerStatus == "failure"){
+  }
 
   delay(299900);
 }
