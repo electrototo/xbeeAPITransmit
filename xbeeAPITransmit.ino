@@ -30,6 +30,8 @@ void setup() {
     Serial.println("Temp sesor not initialized!");
     while(1);
   }
+
+  Serial.println("[+] Arduino and xbee init...");
 }
 
 byte checksum(byte chArray[], int sizeArray){
@@ -170,8 +172,9 @@ String status_read(){
         rOptions = xbee.read();
 
         for(int i = 0; i < (lsb - 14); i++){
-          pText[i] = xbee.read();
-          Serial.print(pText[i]);
+          //pText[i] = xbee.read();
+          
+          Serial.print(xbee.read());
         }
 
         xbee.read();                      //Checksum
@@ -193,8 +196,6 @@ String status_read(){
 }
 
 void loop() {
-  //Change format in raspberry's code 
-
   incommingData = status_read();
 
   if(incommingData == "tfailure"){
@@ -202,6 +203,7 @@ void loop() {
   }
   if(incommingData == "transmit"){
     //insert transmition code here...
+    Serial.println("[+] Transmitting...");
     payload = "";
   
     temp = tempsensor.readTemperature();
